@@ -1,0 +1,4 @@
+pygments
+streamlit
+requests
+Pillow
