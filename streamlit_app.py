@@ -21,41 +21,98 @@ st.markdown("""
     /* Ana arka plan */
     .stApp {
         background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 50%, #0d0d0d 100%);
+        animation: bgPulse 8s ease-in-out infinite;
+    }
+
+    @keyframes bgPulse {
+        0%, 100% { background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 50%, #0d0d0d 100%); }
+        50% { background: linear-gradient(135deg, #0d0d0d 0%, #0d1a0d 50%, #0d0d0d 100%); }
     }
 
     /* Sidebar */
     [data-testid="stSidebar"] {
-        background: rgba(26, 26, 46, 0.95);
+        background: rgba(10, 10, 20, 0.97);
         border-right: 1px solid #00ff4133;
+        animation: sidebarGlow 3s ease-in-out infinite;
     }
 
-    /* Başlık */
+    @keyframes sidebarGlow {
+        0%, 100% { border-right-color: #00ff4122; }
+        50% { border-right-color: #00ff4166; }
+    }
+
+    /* Typewriter başlık */
     .main-title {
         text-align: center;
         font-family: 'Courier New', monospace;
         font-size: 3rem;
         font-weight: bold;
         color: #00ff41;
-        text-shadow: 0 0 20px #00ff4166;
-        margin-bottom: 0.2rem;
+        text-shadow: 0 0 20px #00ff4166, 0 0 40px #00ff4133;
+        overflow: hidden;
+        white-space: nowrap;
+        margin: 0 auto;
+        animation: typewriter 2s steps(20, end), glowPulse 2s ease-in-out infinite 2s;
+        width: fit-content;
     }
 
+    @keyframes typewriter {
+        from { width: 0; }
+        to { width: 100%; }
+    }
+
+    @keyframes glowPulse {
+        0%, 100% { text-shadow: 0 0 20px #00ff4166, 0 0 40px #00ff4133; }
+        50% { text-shadow: 0 0 30px #00ff41cc, 0 0 60px #00ff4166, 0 0 80px #00ff4133; }
+    }
+
+    /* Alt başlık fade-in */
     .sub-title {
         text-align: center;
         font-family: 'Courier New', monospace;
         color: #4a9e4a;
         font-size: 1rem;
         margin-bottom: 2rem;
+        animation: fadeIn 1s ease-in 2s both;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     /* Butonlar */
     .stButton > button {
         background: linear-gradient(135deg, #143d14, #1a5e1a);
         color: #00ff41;
-        border: 1px solid #00ff4166;
+        border: 1px solid #00ff4144;
         border-radius: 8px;
         font-family: 'Courier New', monospace;
         transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stButton > button::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, #00ff4111, transparent);
+        transform: rotate(45deg);
+        transition: all 0.5s ease;
+        opacity: 0;
+    }
+
+    .stButton > button:hover::before {
+        animation: shimmer 0.5s ease forwards;
+    }
+
+    @keyframes shimmer {
+        from { opacity: 0; left: -50%; }
+        to { opacity: 1; left: 150%; }
     }
 
     .stButton > button:hover {
@@ -63,24 +120,50 @@ st.markdown("""
         color: #0d0d0d;
         border-color: #00ff41;
         transform: translateY(-2px);
-        box-shadow: 0 4px 15px #00ff4144;
+        box-shadow: 0 4px 20px #00ff4155, 0 0 40px #00ff4122;
+    }
+
+    /* Primary buton */
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #00ff41, #00cc33) !important;
+        color: #0d0d0d !important;
+        font-weight: bold !important;
+        animation: primaryPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes primaryPulse {
+        0%, 100% { box-shadow: 0 0 10px #00ff4144; }
+        50% { box-shadow: 0 0 25px #00ff4188, 0 0 50px #00ff4133; }
     }
 
     /* Text area */
     .stTextArea textarea {
-        background: #1a1a1a !important;
+        background: #111111 !important;
         color: #00ff41 !important;
         border: 1px solid #00ff4133 !important;
         border-radius: 8px !important;
         font-family: 'Courier New', monospace !important;
         font-size: 13px !important;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        caret-color: #00ff41;
+    }
+
+    .stTextArea textarea:focus {
+        border-color: #00ff41 !important;
+        box-shadow: 0 0 15px #00ff4133 !important;
     }
 
     /* Selectbox */
     .stSelectbox > div > div {
-        background: #1a1a1a !important;
+        background: #111111 !important;
         color: #00ff41 !important;
         border: 1px solid #00ff4133 !important;
+        transition: all 0.3s ease;
+    }
+
+    .stSelectbox > div > div:hover {
+        border-color: #00ff41 !important;
+        box-shadow: 0 0 10px #00ff4133;
     }
 
     /* Sidebar label */
@@ -97,14 +180,7 @@ st.markdown("""
         border-bottom: 1px solid #00ff4133;
         padding-bottom: 0.5rem;
         margin-bottom: 1rem;
-    }
-
-    /* Kart efekti */
-    .preview-card {
-        background: rgba(26, 26, 26, 0.8);
-        border: 1px solid #00ff4133;
-        border-radius: 12px;
-        padding: 1.5rem;
+        animation: fadeIn 0.5s ease-in;
     }
 
     /* Download butonu */
@@ -115,10 +191,130 @@ st.markdown("""
         border: none !important;
         border-radius: 8px !important;
         font-family: 'Courier New', monospace !important;
+        animation: downloadPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes downloadPulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 10px #00ff4155; }
+        50% { transform: scale(1.02); box-shadow: 0 0 25px #00ff4199; }
+    }
+
+    /* Resim fade-in */
+    [data-testid="stImage"] {
+        animation: imageFadeIn 0.8s ease-out;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 255, 65, 0.15);
+    }
+
+    @keyframes imageFadeIn {
+        from { opacity: 0; transform: scale(0.95) translateY(20px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Success mesajı */
+    .stSuccess {
+        animation: fadeIn 0.5s ease-in;
+        border-left: 3px solid #00ff41 !important;
+    }
+
+    /* Error mesajı */
+    .stError {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Spinner */
+    .stSpinner > div {
+        border-top-color: #00ff41 !important;
+    }
+
+    /* Radio button */
+    .stRadio label {
+        color: #4a9e4a !important;
+        font-family: 'Courier New', monospace !important;
+        transition: color 0.3s ease;
+    }
+
+    .stRadio label:hover {
+        color: #00ff41 !important;
+    }
+
+    /* Slider */
+    .stSlider [data-baseweb="slider"] div {
+        background: #00ff41 !important;
+    }
+
+    /* Divider */
+    hr {
+        border-color: #00ff4133 !important;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #0d0d0d;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #00ff4166;
+        border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #00ff41;
+    }
+
+    /* Matrix yağmur efekti arka planda */
+    .matrix-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.03;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        color: #00ff41;
+        overflow: hidden;
     }
 </style>
-""", unsafe_allow_html=True)
 
+<canvas id="matrix" style="position:fixed;top:0;left:0;z-index:0;opacity:0.04;pointer-events:none;"></canvas>
+<script>
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const chars = '01アイウエオカキクケコサシスセソ{}[]<>/\\|';
+    const cols = Math.floor(canvas.width / 16);
+    const drops = Array(cols).fill(1);
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00ff41';
+        ctx.font = '14px Courier New';
+        drops.forEach((y, i) => {
+            const char = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(char, i * 16, y * 16);
+            if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        });
+    }
+    setInterval(drawMatrix, 50);
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+</script>
+""", unsafe_allow_html=True)
 
 def hex_to_rgb(hex_color):
     hex_color = hex_color.strip("#")
