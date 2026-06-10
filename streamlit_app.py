@@ -441,6 +441,19 @@ with col1:
     st.markdown('<div class="section-header">✏️ Kodunu Gir</div>', unsafe_allow_html=True)
 
     baslangic = st.session_state.get("kod", "# Kodunu buraya yaz\ndef merhaba():\n    print('Merhaba Dünya!')")
+    st.markdown("""
+<div style="
+    background: rgba(255,158,181,0.08);
+    border: 1px solid rgba(255,158,181,0.2);
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin-bottom: 10px;
+    font-family: 'Courier New', monospace;
+    color: #c084fc;
+    font-size: 0.85rem;">
+    💡 Python, JavaScript, Java, C++, HTML, CSS desteklenir
+</div>
+""", unsafe_allow_html=True)
     kod = st.text_area("Kod", value=baslangic, height=400, label_visibility="collapsed")
 
     yuklenen = st.file_uploader("📂 Dosya Yükle", type=["py", "js", "java", "cpp", "html", "css"])
@@ -452,7 +465,19 @@ with col1:
 with col2:
     st.markdown('<div class="glass-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-header">👁️ Önizleme & İndir</div>', unsafe_allow_html=True)
-
+    st.markdown("""
+    <div style="
+        background: rgba(255,158,181,0.08);
+        border: 1px solid rgba(255,158,181,0.2);
+        border-radius: 10px;
+        padding: 10px 16px;
+        margin-bottom: 10px;
+        font-family: 'Courier New', monospace;
+        color: #c084fc;
+        font-size: 0.85rem;">
+        📸 Tema ve dil seçip butona bas, PNG oluşturulsun
+    </div>
+    """, unsafe_allow_html=True)
     if st.button("📸 Ekran Görüntüsü Al", type="primary", use_container_width=True):
         if not kod.strip():
             st.warning("Lütfen kod girin!")
