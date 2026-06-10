@@ -243,7 +243,7 @@ st.markdown(f"""
 </script>
 """, unsafe_allow_html=True)
 # ── GIF URL ──
-gif_url = "https://raw.githubusercontent.com/BAYSAL16/CodeSnap-pro/main/Animated_GIF.gif"
+gif_url = "https://raw.githubusercontent.com/BAYSAL16/CodeSnap-pro/main/Hareketli%20GIF.gif"
 gif_html = f'<img src="{gif_url}" style="width:100%;border-radius:12px;"/>'
 
 def hex_to_rgb(hex_color):
