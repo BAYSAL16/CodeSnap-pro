@@ -1,10 +1,7 @@
 import streamlit as st
 from io import BytesIO
-import base64
 from PIL import Image, ImageDraw, ImageFont
-from pygments import highlight
 from pygments.lexers import get_lexer_by_name
-from pygments.formatters import HtmlFormatter
 from pygments.styles import get_style_by_name
 from github_loader import GitHubLoader
 
@@ -15,27 +12,63 @@ st.set_page_config(
     layout="wide"
 )
 
-
+# ── GIF URL ──
+gif_url = "https://raw.githubusercontent.com/BAYSAL16/CodeSnap-pro/main/sakura.gif"
 
 # ── CSS ──
 st.markdown(f"""
 <style>
-    /* Ana arka plan */
+    /* GIF arka plan */
     .stApp {{
-        background: linear-gradient(160deg, #0a0a1a 0%, #0d0d2b 40%, #1a0a2e 100%);
+        background-image: url('{gif_url}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
     }}
 
-    /* Sidebar */
+    /* Arka plan üstüne koyu overlay */
+    .stApp::before {{
+        content: '';
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(5, 5, 20, 0.55);
+        z-index: 0;
+        pointer-events: none;
+    }}
+
+    /* Tüm içerik overlay'in üstünde */
+    .main .block-container {{
+        position: relative;
+        z-index: 1;
+    }}
+
+    /* Sidebar cam efekti */
     [data-testid="stSidebar"] {{
-        background: rgba(10, 10, 30, 0.97);
-        border-right: 1px solid #ff9eb544;
+        background: rgba(10, 5, 30, 0.75) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-right: 1px solid rgba(255, 158, 181, 0.2);
     }}
 
-    /* Typewriter başlık */
+    /* Cam kart efekti — genel */
+    .glass-card {{
+        background: rgba(15, 10, 40, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 158, 181, 0.25);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 32px rgba(192, 132, 252, 0.1);
+    }}
+
+    /* Başlık */
     .main-title {{
         text-align: center;
         font-family: 'Courier New', monospace;
-        font-size: 2.8rem;
+        font-size: 3rem;
         font-weight: bold;
         background: linear-gradient(135deg, #ff9eb5, #c084fc, #ff9eb5);
         background-size: 200% auto;
@@ -46,6 +79,7 @@ st.markdown(f"""
         white-space: nowrap;
         margin: 0 auto;
         width: fit-content;
+        filter: drop-shadow(0 0 20px rgba(255, 158, 181, 0.5));
     }}
 
     @keyframes typewriter {{
@@ -62,10 +96,11 @@ st.markdown(f"""
     .sub-title {{
         text-align: center;
         font-family: 'Courier New', monospace;
-        color: #c084fc88;
+        color: rgba(192, 132, 252, 0.8);
         font-size: 1rem;
         margin-bottom: 1.5rem;
         animation: fadeIn 1s ease-in 2s both;
+        text-shadow: 0 0 10px rgba(192, 132, 252, 0.5);
     }}
 
     @keyframes fadeIn {{
@@ -73,68 +108,83 @@ st.markdown(f"""
         to {{ opacity: 1; transform: translateY(0); }}
     }}
 
-    /* Butonlar */
-    .stButton > button {{
-        background: linear-gradient(135deg, #2d1b4e, #3d1f6e);
-        color: #ff9eb5;
-        border: 1px solid #ff9eb544;
-        border-radius: 10px;
-        font-family: 'Courier New', monospace;
-        transition: all 0.3s ease;
-    }}
-
-    .stButton > button:hover {{
-        background: linear-gradient(135deg, #ff9eb5, #c084fc);
-        color: #0a0a1a;
-        border-color: #ff9eb5;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 20px #ff9eb555, 0 0 40px #c084fc22;
-    }}
-
-    /* Text area */
-    .stTextArea textarea {{
-        background: #0d0d2b !important;
-        color: #e2d9f3 !important;
-        border: 1px solid #ff9eb533 !important;
-        border-radius: 10px !important;
-        font-family: 'Courier New', monospace !important;
-        font-size: 13px !important;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }}
-
-    .stTextArea textarea:focus {{
-        border-color: #ff9eb5 !important;
-        box-shadow: 0 0 15px #ff9eb522 !important;
-    }}
-
-    /* Selectbox */
-    .stSelectbox > div > div {{
-        background: #0d0d2b !important;
-        color: #e2d9f3 !important;
-        border: 1px solid #ff9eb533 !important;
-        transition: all 0.3s ease;
-    }}
-
-    /* Label */
-    label, [data-testid="stSidebar"] label {{
-        color: #c084fc !important;
-        font-family: 'Courier New', monospace !important;
-    }}
-
     /* Bölüm başlıkları */
     .section-header {{
         font-family: 'Courier New', monospace;
         color: #ff9eb5;
         font-size: 1.1rem;
-        border-bottom: 1px solid #ff9eb533;
+        border-bottom: 1px solid rgba(255, 158, 181, 0.3);
         padding-bottom: 0.5rem;
         margin-bottom: 1rem;
-        animation: fadeIn 0.5s ease-in;
+        text-shadow: 0 0 10px rgba(255, 158, 181, 0.4);
+    }}
+
+    /* Butonlar */
+    .stButton > button {{
+        background: rgba(45, 27, 78, 0.8) !important;
+        color: #ff9eb5 !important;
+        border: 1px solid rgba(255, 158, 181, 0.4) !important;
+        border-radius: 10px !important;
+        font-family: 'Courier New', monospace !important;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease !important;
+    }}
+
+    .stButton > button:hover {{
+        background: linear-gradient(135deg, #ff9eb5, #c084fc) !important;
+        color: #0a0a1a !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 20px rgba(255, 158, 181, 0.4) !important;
+    }}
+
+    /* Primary buton */
+    [data-testid="stBaseButton-primary"] {{
+        background: linear-gradient(135deg, rgba(255,158,181,0.9), rgba(192,132,252,0.9)) !important;
+        color: #0a0a1a !important;
+        font-weight: bold !important;
+        border: none !important;
+        animation: primaryPulse 2s ease-in-out infinite;
+    }}
+
+    @keyframes primaryPulse {{
+        0%, 100% {{ box-shadow: 0 0 15px rgba(255,158,181,0.4); }}
+        50% {{ box-shadow: 0 0 30px rgba(255,158,181,0.7), 0 0 50px rgba(192,132,252,0.3); }}
+    }}
+
+    /* Text area */
+    .stTextArea textarea {{
+        background: rgba(10, 5, 35, 0.75) !important;
+        color: #f0e6ff !important;
+        border: 1px solid rgba(255, 158, 181, 0.3) !important;
+        border-radius: 10px !important;
+        font-family: 'Courier New', monospace !important;
+        font-size: 13px !important;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }}
+
+    .stTextArea textarea:focus {{
+        border-color: rgba(255, 158, 181, 0.7) !important;
+        box-shadow: 0 0 20px rgba(255, 158, 181, 0.2) !important;
+    }}
+
+    /* Selectbox */
+    .stSelectbox > div > div {{
+        background: rgba(10, 5, 35, 0.75) !important;
+        color: #f0e6ff !important;
+        border: 1px solid rgba(255, 158, 181, 0.3) !important;
+        backdrop-filter: blur(10px);
+    }}
+
+    /* Label */
+    label {{
+        color: #c084fc !important;
+        font-family: 'Courier New', monospace !important;
     }}
 
     /* Download butonu */
     .stDownloadButton > button {{
-        background: linear-gradient(135deg, #ff9eb5, #c084fc) !important;
+        background: linear-gradient(135deg, rgba(255,158,181,0.9), rgba(192,132,252,0.9)) !important;
         color: #0a0a1a !important;
         font-weight: bold !important;
         border: none !important;
@@ -144,16 +194,16 @@ st.markdown(f"""
     }}
 
     @keyframes downloadPulse {{
-        0%, 100% {{ box-shadow: 0 0 10px #ff9eb544; }}
-        50% {{ box-shadow: 0 0 25px #ff9eb588, 0 0 50px #c084fc33; }}
+        0%, 100% {{ box-shadow: 0 0 10px rgba(255,158,181,0.4); }}
+        50% {{ box-shadow: 0 0 25px rgba(255,158,181,0.7), 0 0 50px rgba(192,132,252,0.3); }}
     }}
 
-    /* Resim fade-in */
+    /* Resim */
     [data-testid="stImage"] {{
         animation: imageFadeIn 0.8s ease-out;
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 8px 32px rgba(255, 158, 181, 0.15);
+        box-shadow: 0 8px 32px rgba(255, 158, 181, 0.2);
     }}
 
     @keyframes imageFadeIn {{
@@ -161,28 +211,10 @@ st.markdown(f"""
         to {{ opacity: 1; transform: scale(1) translateY(0); }}
     }}
 
-    /* Success */
-    .stSuccess {{
-        animation: fadeIn 0.5s ease-in;
-        border-left: 3px solid #ff9eb5 !important;
-    }}
-
-    /* Error shake */
-    .stAlert {{
-        animation: shake 0.5s ease-in-out;
-    }}
-
-    @keyframes shake {{
-        0%, 100% {{ transform: translateX(0); }}
-        25% {{ transform: translateX(-5px); }}
-        75% {{ transform: translateX(5px); }}
-    }}
-
     /* Radio */
     .stRadio label {{
         color: #c084fc !important;
         font-family: 'Courier New', monospace !important;
-        transition: color 0.3s ease;
     }}
 
     .stRadio label:hover {{
@@ -191,20 +223,18 @@ st.markdown(f"""
 
     /* Scrollbar */
     ::-webkit-scrollbar {{ width: 6px; }}
-    ::-webkit-scrollbar-track {{ background: #0a0a1a; }}
-    ::-webkit-scrollbar-thumb {{ background: #ff9eb566; border-radius: 3px; }}
+    ::-webkit-scrollbar-track {{ background: rgba(10, 5, 30, 0.5); }}
+    ::-webkit-scrollbar-thumb {{ background: rgba(255, 158, 181, 0.4); border-radius: 3px; }}
     ::-webkit-scrollbar-thumb:hover {{ background: #ff9eb5; }}
 
     /* Divider */
-    hr {{ border-color: #ff9eb522 !important; }}
+    hr {{ border-color: rgba(255, 158, 181, 0.2) !important; }}
 
     /* Yaprak animasyonu */
     .sakura-container {{
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
         pointer-events: none;
         z-index: 9999;
         overflow: hidden;
@@ -213,15 +243,19 @@ st.markdown(f"""
     .petal {{
         position: absolute;
         top: -20px;
-        font-size: 16px;
         animation: fall linear infinite;
-        opacity: 0.7;
+        opacity: 0.8;
     }}
 
     @keyframes fall {{
-        0% {{ top: -20px; transform: rotate(0deg) translateX(0); opacity: 0.8; }}
-        50% {{ transform: rotate(180deg) translateX(30px); }}
+        0% {{ top: -20px; transform: rotate(0deg) translateX(0); opacity: 0.9; }}
+        50% {{ transform: rotate(180deg) translateX(40px); }}
         100% {{ top: 100vh; transform: rotate(360deg) translateX(-20px); opacity: 0; }}
+    }}
+
+    /* Genel metin rengi */
+    .stMarkdown, p, span {{
+        color: #f0e6ff;
     }}
 </style>
 
@@ -229,22 +263,20 @@ st.markdown(f"""
 <div class="sakura-container" id="sakura"></div>
 <script>
     const container = document.getElementById('sakura');
-    const petals = ['🌸', '🌺', '✿', '❀'];
-    for (let i = 0; i < 15; i++) {{
+    const petals = ['🌸', '🌺', '✿', '❀', '🌷'];
+    for (let i = 0; i < 20; i++) {{
         const petal = document.createElement('div');
         petal.className = 'petal';
         petal.innerHTML = petals[Math.floor(Math.random() * petals.length)];
         petal.style.left = Math.random() * 100 + 'vw';
-        petal.style.animationDuration = (Math.random() * 6 + 6) + 's';
-        petal.style.animationDelay = (Math.random() * 8) + 's';
-        petal.style.fontSize = (Math.random() * 12 + 10) + 'px';
+        petal.style.animationDuration = (Math.random() * 8 + 6) + 's';
+        petal.style.animationDelay = (Math.random() * 10) + 's';
+        petal.style.fontSize = (Math.random() * 14 + 10) + 'px';
         container.appendChild(petal);
     }}
 </script>
 """, unsafe_allow_html=True)
-# ── GIF URL ──
-gif_url = "https://raw.githubusercontent.com/BAYSAL16/CodeSnap-pro/main/sakura.gif"
-gif_html = f'<img src="{gif_url}" style="width:100%;border-radius:12px;"/>'
+
 
 def hex_to_rgb(hex_color):
     hex_color = hex_color.strip("#")
@@ -254,7 +286,6 @@ def hex_to_rgb(hex_color):
 
 
 def kod_to_png(kod, dil, tema, stil, font_boyutu=15):
-    lexer = get_lexer_by_name(dil)
     style_obj = get_style_by_name(tema)
     bg_color = style_obj.background_color or "#1a1a2e"
     default_color = "#e2d9f3"
@@ -356,11 +387,7 @@ def kod_to_png(kod, dil, tema, stil, font_boyutu=15):
 st.markdown('<div class="main-title">🌸 CodeSnap Pro</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">── kod güzelleştirici ──</div>', unsafe_allow_html=True)
 
-# ── GIF ──
-# ── GIF ──
-col_gif1, col_gif2, col_gif3 = st.columns([1, 2, 1])
-with col_gif2:
-    st.markdown(gif_html, unsafe_allow_html=True)
+st.divider()
 
 # ── Sidebar ──
 with st.sidebar:
@@ -406,10 +433,11 @@ with st.sidebar:
             except ValueError as e:
                 st.error(str(e))
 
-# ── Ana alan ──
+# ── Ana alan — cam kartlar ──
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
+    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-header">✏️ Kodunu Gir</div>', unsafe_allow_html=True)
 
     baslangic = st.session_state.get("kod", "# Kodunu buraya yaz\ndef merhaba():\n    print('Merhaba Dünya!')")
@@ -419,8 +447,10 @@ with col1:
     if yuklenen:
         st.session_state["kod"] = yuklenen.read().decode("utf-8")
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
+    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-header">👁️ Önizleme & İndir</div>', unsafe_allow_html=True)
 
     if st.button("📸 Ekran Görüntüsü Al", type="primary", use_container_width=True):
@@ -448,3 +478,5 @@ with col2:
 
             except Exception as e:
                 st.error(f"Hata: {str(e)}")
+
+    st.markdown('</div>', unsafe_allow_html=True)
