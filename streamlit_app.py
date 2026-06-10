@@ -15,16 +15,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# ── GIF'i base64'e çevir ──
-def get_gif_base64():
-    try:
-        with open("Animated_GIF.gif", "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    except:
-        return None
 
-gif_base64 = get_gif_base64()
-gif_html = f'<img src="data:image/gif;base64,{gif_base64}" style="width:100%;border-radius:12px;"/>' if gif_base64 else ""
 
 # ── CSS ──
 st.markdown(f"""
@@ -251,7 +242,9 @@ st.markdown(f"""
     }}
 </script>
 """, unsafe_allow_html=True)
-
+# ── GIF URL ──
+gif_url = "https://raw.githubusercontent.com/BAYSAL16/CodeSnap-pro/main/Animated_GIF.gif"
+gif_html = f'<img src="{gif_url}" style="width:100%;border-radius:12px;"/>'
 
 def hex_to_rgb(hex_color):
     hex_color = hex_color.strip("#")
@@ -364,12 +357,10 @@ st.markdown('<div class="main-title">🌸 CodeSnap Pro</div>', unsafe_allow_html
 st.markdown('<div class="sub-title">── kod güzelleştirici ──</div>', unsafe_allow_html=True)
 
 # ── GIF ──
-if gif_base64:
-    col_gif1, col_gif2, col_gif3 = st.columns([1, 2, 1])
-    with col_gif2:
-        st.markdown(gif_html, unsafe_allow_html=True)
-
-st.divider()
+# ── GIF ──
+col_gif1, col_gif2, col_gif3 = st.columns([1, 2, 1])
+with col_gif2:
+    st.markdown(gif_html, unsafe_allow_html=True)
 
 # ── Sidebar ──
 with st.sidebar:
